@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Calendar</title>
+    <!-- Add these links in the <head> tag, after the title: -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js"></script>
+    <!-- No need for the Hijri.js script -->
+</head>
+<body>
+    <h1>Your Calendar</h1>
+    <!-- Inside the <body> tag, add this: -->
+    <div id="calendar">
+        <!-- Calendar display goes here -->
+    </div>
+    <form id="eventForm">
+        <label for="event">Event:</label>
+        <input type="text" id="event" name="event" required>
+        <label for="date">Date:</label>
+        <input type="date" id="date" name="date" required>
+        <button type="button" onclick="saveEvent()">Save Event</button>
+    </form>
+<!-- Update the existing script section: -->
+
+<!-- Update the existing script section: -->
+
+<script>
+    let eventsArray = [];
+
+    function initializeCalendar() {
+        // Load events from local storage
+        const storedEvents = localStorage.getItem('calendarEvents');
+        if (storedEvents) {
+            eventsArray = JSON.parse(storedEvents);
+        }
+
+        $(document).ready(function () {
+            $('#calendar').fullCalendar({
+                // Existing FullCalendar configuration
+                eventClick: function (calEvent, jsEvent, view) {
+                    // Handle event click (delete or any other action)
+                    const confirmDelete = confirm(`Delete event: ${calEvent.title}?`);
+                    if (confirmDelete) {
+                        // Remove the event from the array
+                        eventsArray = eventsArray.filter(event => event !== calEvent);
+                        // Update FullCalendar events
+                        $('#calendar').fullCalendar('removeEvents', calEvent._id);
+                        // Save events to local storage
+                        saveEventsToLocalStorage();
+                    }
+                },
+                events: eventsArray // Load events into the calendar
+            });
+        });
+    }
+
+    function saveEvent() {
+        const event = document.getElementById('event').value;
+        const gregorianDate = document.getElementById('date').value;
+
+        // Add the new event to the array
+        const newEvent = {
+            title: event,
+            start: gregorianDate
+        };
+        eventsArray.push(newEvent);
+
+        // Update FullCalendar events
+        $('#calendar').fullCalendar('renderEvent', newEvent, true);
+
+        // Save events to local storage
+        saveEventsToLocalStorage();
+
+        // Clear the form or do any other necessary updates
+        document.getElementById('event').value = '';
+        document.getElementById('date').value = '';
+    }
+
+    function saveEventsToLocalStorage() {
+        // Save events to local storage
+        localStorage.setItem('calendarEvents', JSON.stringify(eventsArray));
+    }
+
+    // Initialize FullCalendar
+    $(document).ready(function () {
+        initializeCalendar();
+    });
+</script>
+</body>
+</html>
